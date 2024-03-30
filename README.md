@@ -1,293 +1,158 @@
 
-# PowerShell-Scripting
+# Running commands in the shell
 
----
-description: Where to find and how to launch PowerShell for new users.
-ms.custom: Contributor-mikefrobbins
-ms.date: 11/16/2022
-ms.reviewer: mirobb
-title: Getting Started with PowerShell
----
-# Chapter 1 - Getting Started with PowerShell
+PowerShell is a command-line shell and a scripting language used for automation. Similar to other
+shells, like `bash` on Linux or the Windows Command Shell (`cmd.exe`), PowerShell lets you to run
+any command available on your system, not just PowerShell commands.
 
-I often find that presenters at conferences and user group meetings already have PowerShell running
-when they start entry-level presentations. This book begins by answering the questions I've heard
-attendees who haven't previously used PowerShell ask in those sessions.
+## Types of commands
 
-Specifically, this chapter focuses on finding and launching PowerShell, and solving some of the
-initial pain points that new users experience with PowerShell. Be sure to follow along and
-walk through the examples shown in this chapter on your Windows 10 lab environment computer.
+For any shell in any operating system there are three types of commands:
 
-## What do I need to get started with PowerShell?
+- **Shell language keywords** are part of the shell's scripting language.
 
-All modern versions of Windows operating systems ship with PowerShell installed. If you're running a version older than 5.1, you should install the latest version.
+  - Examples of `bash` keywords include: `if`, `then`, `else`, `elif`, and `fi`.
+  - Examples of `cmd.exe` keywords include: `dir`, `copy`, `move`, `if`, and `echo`.
+  - Examples of PowerShell keywords include: `for`, `foreach`, `try`, `catch`, and `trap`.
 
-- To upgrade to Windows PowerShell 5.1, see [Upgrading existing Windows PowerShell][Upgrading existing Windows PowerShell]
-- To install the latest version of PowerShell, see [Installing PowerShell][Installing PowerShell]
+  Shell language keywords can only be used within the runtime environment of the shell. There is no
+  executable file, external to the shell, that provides the keyword's functionality.
 
-## Where do I find PowerShell?
+- **OS-native commands** are executable files installed in the operating system. The executables can
+  be run from any command-line shell, like PowerShell. This includes script files that may require
+  other shells to work properly. For example, if you run a Windows batch script (`.cmd` file) in
+  PowerShell, PowerShell runs `cmd.exe` and passes in the batch file for execution.
 
-The easiest way to find PowerShell on Windows 10 is to type **PowerShell** into the search bar as
-shown in Figure 1-1.
+- **Shell environment-specific commands** are commands defined in external files that can only be
+  used within the runtime environment of the shell. These include scripts and functions, or they can
+  be specially compiled modules that add commands to the shell runtime. In PowerShell, these
+  commands are known as _cmdlets_ (pronounced "command-lets").
 
-![Figure 1-1 - Search for PowerShell in the Start Menu](media/figure1-1.png)
+## Running native commands
 
-Notice that four different shortcuts for PowerShell are shown in Figure 1-1. The computer used for
-demonstration purposes in this book is running the 64-bit version of Windows 10 so there's a 64-bit
-version of the PowerShell console and the PowerShell ISE (Integrated Scripting Environment), and a
-32-bit version of each one as denoted by the (x86) suffix on the shortcuts. If you happen to be
-running a 32-bit version of Windows 10, you'll only have two shortcuts. Those items don't have the
-(x86) suffix, but are 32-bit versions. If you have a 64-bit operating system, my recommendation is
-to run the 64-bit version of PowerShell unless you have a specific reason for running the 32-bit
-version.
+Any native command can be run from the PowerShell command line. Usually you run the command exactly
+as you would in `bash` or `cmd.exe`. The following example shows running the `grep` command in
+`bash` on Ubuntu Linux.
 
-For information about starting PowerShell on other versions of Windows, see
-[Starting Windows PowerShell][Starting Windows PowerShell].
+```bash
+sdwheeler@circumflex:~$ grep sdwheeler /etc/passwd
+sdwheeler:x:1000:1000:,,,:/home/sdwheeler:/bin/bash
+sdwheeler@circumflex:~$ pwsh
+PowerShell 7.2.6
+Copyright (c) Microsoft Corporation.
 
-## How do I launch PowerShell?
+https://aka.ms/powershell
+Type 'help' to get help.
+```
 
-In the production enterprise environments that I support, I use three different Active Directory
-user accounts. I've mirrored those accounts in the lab environment used in this book. I log into the
-Windows 10 computer as a domain user who is not a domain or local administrator.
-
-I've launched the PowerShell console by clicking on the "Windows PowerShell" shortcut as shown in
-Figure 1-1.
-
-![Figure 1-4 - Title bar of the PowerShell window](media/figure1-4.png)
-
-Notice that the title bar of the PowerShell console says "Windows PowerShell" as shown in Figure
-1-4. Some commands run fine, but PowerShell can't participate in User Access Control (UAC). That
-means it's unable to prompt for elevation for tasks that require the approval of an administrator.
-The following error message is generated:
+After starting PowerShell on Ubuntu, you can run the same command from the PowerShell command line:
 
 ```powershell
-Get-Service -Name W32Time | Stop-Service
+PS /home/sdwheeler> grep sdwheeler /etc/passwd
+sdwheeler:x:1000:1000:,,,:/home/sdwheeler:/bin/bash
 ```
 
-```Output
-Stop-Service : Service 'Windows Time (W32Time)' cannot be stopped due to the following
-error: Cannot open W32Time service on computer '.'.
-At line:1 char:29
-+ Get-Service -Name W32Time | Stop-Service
-+
-    + CategoryInfo          : CloseError: (System.ServiceProcess.ServiceController:ServiceController)
-     [Stop-Service], ServiceCommandException
-    + FullyQualifiedErrorId : CouldNotStopService,Microsoft.PowerShell.Commands.StopServiceCommand
-```
+### Passing arguments to native commands
 
-The solution to this problem is to run PowerShell as a domain user who is a local administrator.
-This is how my second domain user account is configured. Using the principle of least privilege,
-this account should NOT be a domain administrator, or have any elevated privileges in the domain.
+Most shells include features for using variables, evaluating expressions, and handling strings. But
+each shell does these things differently. In PowerShell, all parameters start with a hyphen (`-`)
+character. In `cmd.exe`, most parameters use a slash (`/`) character. Other command-line tools may
+not have a special character for parameters.
 
-Close PowerShell. Relaunch the PowerShell console, except this time right-click on the **Windows
-PowerShell** shortcut and select **Run as administrator** as shown in Figure 1-5.
+Each shell has its own way of handling and evaluating strings on the command line. When running
+native commands in PowerShell that expect strings to be quoted in a specific way, you may need
+adjust how you pass those strings.
 
-![Figure 1-5 - Context menu - Run as administrator](media/figure1-5.png)
+For more information, see the following articles:
 
-If you're logged into Windows as a normal user, you'll be prompted for credentials. I'll enter the
-credentials for my user account who is a domain user and local admin as shown in Figure 1-6.
+- [about_Parsing][1]
+- [about_Quoting_Rules][2]
 
-![Figure 1-6](media/figure1-6.png)
+PowerShell 7.2 introduced a new experimental feature `PSnativeCommandArgumentPassing` that improved
+native command handling. For more information, see [PSnativeCommandArgumentPassing][3].
 
-Once PowerShell is relaunched as an administrator, the title bar should say "Administrator: Windows
-PowerShell" as shown in Figure 1-7.
+### Handling output and errors
 
-![Figure 1-7](media/figure1-7.png)
+PowerShell also has several more output streams than other shells. The `bash` and `cmd.exe` shells
+have **stdout** and **stderr**. PowerShell has six output streams. For more information, see
+[about_Redirection][4] and [about_Output_Streams][5].
 
-Now that PowerShell is being run elevated as a local administrator, UAC will no longer be a problem
-when a command is run on the local computer that would normally require a prompt for elevation. Keep
-in mind though that any command run from this elevated instance of the PowerShell console, also runs
-elevated.
+In general, the output sent to **stdout** by a native command is sent to the **Success** stream in
+PowerShell. Output sent to **stderr** by a native command is sent to the **Error** stream in
+PowerShell.
 
-To simplify finding PowerShell and launching it as an administrator, I recommend pinning it to the
-taskbar and setting it to automatically launch as an admin each time it's run.
+When a native command has a non-zero exit code, `$?` is set to `$false`. If the exit code is zero,
+`$?` is set to `$true`.
 
-Search for PowerShell again, except this time right-click on it and select "Pin to taskbar" as shown
-in Figure 1-8.
+However, this changed in PowerShell 7.2. Error records redirected from native commands, like when
+using redirection operators (`2>&1`), aren't written to PowerShell's `$Error` variable and the
+preference variable `$ErrorActionPreference` doesn't affect the redirected output.
 
-![Figure 1-8](media/figure1-8.png)
+Many native commands write to **stderr** as an alternative stream for additional information. This
+behavior can cause confusion in PowerShell when looking through errors and the additional output
+information can be lost if `$ErrorActionPreference` is set to a state that mutes the output.
 
-Right-click on the PowerShell shortcut that's now pinned to the taskbar and select properties as
-shown in Figure 1-9.
+PowerShell 7.3 added a new experimental feature `PSnativeCommandErrorActionPreference` that allows
+you to control whether output to `stderr` is treated as an error. For more information, see
+[PSnativeCommandErrorActionPreference][6].
 
-![Figure 1-9 - User account control - enter credentials](media/figure1-9.png)
+## Running PowerShell commands
 
-Click on "Advanced" as denoted by #1 in Figure 1-10, then check the "Run as administrator" checkbox
-as denoted by #2 in Figure 1-10, and then click OK twice to accept the changes and exit out of both
-dialog boxes.
+As previously noted, PowerShell commands are known as cmdlets. Cmdlets are collected into PowerShell
+modules that can be loaded on demand. Cmdlets can be written in any compiled .NET language or using
+the PowerShell scripting language itself.
 
-![Figure 1-10 - Title bar showing "Administrator"](media/figure1-10.png)
+### PowerShell commands that run other commands
 
-You'll never have to worry about finding PowerShell or whether or not it's running as an
-administrator again.
+The PowerShell **call operator** (`&`) lets you run commands that are stored in variables and
+represented by strings or script blocks. You can use this to run any native command or PowerShell
+command. This is useful in a script when you need to dynamically construct the command-line
+parameters for a native command. For more information, see the [call operator][7].
 
-Running PowerShell elevated as an administrator to prevent having problems with UAC only impacts
-commands that are run against the local computer. It has no effect on commands that target remote
-computers.
+The `Start-Process` cmdlet can be used to run native commands, but should only be used when you need
+to control how the command is executed. The cmdlet has parameters to support the following
+scenarios:
 
-## What version of PowerShell am I running?
+- Run a command using different credentials
+- Hide the console window created by the new process
+- Redirect **stdin**, **stdout**, and **stderr** streams
+- Use a different working directory for the command
 
-There are a number of automatic variables in PowerShell that store state information. One of these
-variables is `$PSVersionTable`, which contains a hashtable that can be used to display the relevant
-PowerShell version information:
+The following example runs the native command `sort.exe` with redirected input and output streams.
 
 ```powershell
-$PSVersionTable
+$processOptions = @{
+    FilePath = "sort.exe"
+    RedirectStandardInput = "TestSort.txt"
+    RedirectStandardOutput = "Sorted.txt"
+    RedirectStandardError = "SortError.txt"
+    UseNewEnvironment = $true
+}
+Start-Process @processOptions
 ```
 
-```Output
-Name                           Value
-----                           -----
-PSVersion                      5.1.19041.1
-PSEdition                      Desktop
-PSCompatibleVersions           {1.0, 2.0, 3.0, 4.0...}
-BuildVersion                   10.0.19041.1
-CLRVersion                     4.0.30319.42000
-WSManStackVersion              3.0
-PSRemotingProtocolVersion      2.3
-SerializationVersion           1.1.0.1
-```
+For more information, see [Start-Process][8].
 
-Newer versions of Windows PowerShell are distributed as part of the Windows Management Framework
-(WMF). A specific version of the .NET Framework is required depending on the WMF version. To upgrade
-to Windows PowerShell 5.1, see [Upgrading existing Windows PowerShell][Upgrading existing Windows PowerShell].
+On Windows, the `Invoke-Item` cmdlet performs the default action for the specified item. For
+example, it runs an executable file or opens a document file using the application associated with
+the document file type. The default action depends on the type of item and is resolved by the
+PowerShell provider that provides access to the item.
 
-## Execution Policy
-
-Contrary to popular belief, the execution policy in PowerShell is not a security boundary. It's
-designed to prevent a user from unknowingly running a script. A determined user can easily bypass
-the execution policy in PowerShell. Table 1-2 shows the default execution policy for current
-Windows operating systems.
-
-| Windows Operating System Version | Default Execution Policy |
-| -------------------------------- | ------------------------ |
-| Server 2019                      | Remote Signed            |
-| Server 2016                      | Remote Signed            |
-| Windows 10                       | Restricted               |
-
-Regardless of the execution policy setting, any PowerShell command can be run interactively. The
-execution policy only affects commands running in a script. The `Get-ExecutionPolicy` cmdlet is used
-to determine what the current execution policy setting is and the `Set-ExecutionPolicy` cmdlet is
-used to change the execution policy. My recommendation is to use the **RemoteSigned** policy, which
-requires downloaded scripts to be signed by a trusted publisher in order to be run.
-
-Check the current execution policy:
+The following example opens the PowerShell source code repository in your default web browser.
 
 ```powershell
-Get-ExecutionPolicy
+Invoke-Item https://github.com/PowerShell/PowerShell
 ```
 
-```Output
-Restricted
-```
-
-PowerShell scripts can't be run at all when the execution policy is set to **Restricted**. This is
-the default setting on all Windows client operating systems. To demonstrate the problem, save the
-following code as a `.ps1` file named `Stop-TimeService.ps1`.
-
-> [!TIP]
-> A PowerShell script is a plaintext file with a `.ps1` extension that contains the commands you
-> want to run. To create a PowerShell script, use a code editor like Visual Studio Code (VS Code) or
-> any text editor such as Notepad.
-
-```powershell
-Get-Service -Name W32Time | Stop-Service -PassThru
-```
-
-That command runs interactively without error as long as PowerShell is run elevated as an
-administrator. But as soon as it's saved as a script file and you try to execute the script, it
-generates an error:
-
-```powershell
-.\Stop-TimeService.ps1
-```
-
-```Output
-.\Stop-TimeService.ps1 : File C:\demo\Stop-TimeService.ps1 cannot be loaded because
-running scripts is disabled on this system. For more information, see
-about_Execution_Policies at http://go.microsoft.com/fwlink/?LinkID=135170.
-At line:1 char:1
-+ .\Stop-TimeService.ps1
-+
-    + CategoryInfo          : SecurityError: (:) [], PSSecurityException
-    + FullyQualifiedErrorId : UnauthorizedAccess
-```
-
-Notice that the error shown in the previous set of results tells you exactly what the problem is
-(running scripts is disabled on this system). When you run a command in PowerShell that generates an
-error message, be sure to read the error message instead of just rerunning the command and hoping
-that it runs successfully.
-
-Change the PowerShell execution policy to remote signed.
-
-```powershell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned
-```
-
-```Output
-Execution Policy Change
-The execution policy helps protect you from scripts that you do not trust. Changing the execution
-policy might expose you to the security risks described in the about_Execution_Policies help topic
-at http://go.microsoft.com/fwlink/?LinkID=135170. Do you want to change the execution policy?
-[Y] Yes [A] Yes to All [N] No [L] No to All [S] Suspend [?] Help (default is "N"):y
-```
-
-Be sure to read the warning that's displayed when changing the execution policy. I also recommend
-taking a look at the [about_Execution_Policies][about_Execution_Policies] help topic to make sure you understand the
-security implications of changing the execution policy.
-
-Now that the execution policy has been set to **RemoteSigned**, the `Stop-TimeService.ps1` script
-runs error free.
-
-```powershell
-.\Stop-TimeService.ps1
-```
-
-```Output
-Status   Name               DisplayName
-------   ----               -----------
-Stopped  W32Time            Windows Time
-```
-
-Be sure to start your Windows Time service before continuing otherwise you may run into unforeseen
-problems.
-
-```powershell
-Start-Service -Name w32time
-```
-
-## Summary
-
-In this chapter, you've learned how to find and launch PowerShell, and how to create a shortcut that
-launches PowerShell as an administrator. You've also learned about the default execution policy and
-how to change it.
-
-## Review
-
-1. How do you determine what PowerShell version a computer is running?
-1. Why is it important to launch PowerShell elevated as an administrator?
-1. How do you determine the current PowerShell execution policy?
-1. What does the default PowerShell execution policy on Windows client computers prevent from
-   occurring?
-1. How do you change the PowerShell execution policy?
-
-## Recommended Reading
-
-For those who want to know more information about the topics covered in this chapter, I recommend
-reading the following PowerShell help topics.
-
-- [about_Automatic_Variables][about_Automatic_Variables]
-- [about_Hash_Tables][about_Hash_Tables]
-- [about_Execution_Policies][about_Execution_Policies]
-
-In the next chapter, you'll learn about the discoverability of commands in PowerShell. One of the
-things that will be covered is how to update PowerShell so those help topics can be viewed right
-from within PowerShell instead of having to view them on the internet.
+For more information, see [Invoke-Item][9].
 
 <!-- link references -->
-[about_Automatic_Variables]: /powershell/module/microsoft.powershell.core/about/about_automatic_variables
-[about_Hash_Tables]: /powershell/module/microsoft.powershell.core/about/about_hash_tables
-[about_Execution_Policies]: /powershell/module/microsoft.powershell.core/about/about_execution_policies
-[Upgrading existing Windows PowerShell]: /powershell/scripting/windows-powershell/install/installing-windows-powershell#upgrading-existing-windows-powershell
-[Installing PowerShell]: /powershell/scripting/install/installing-powershell
-[Starting Windows PowerShell]: /powershell/scripting/windows-powershell/starting-windows-powershell
+[1]: /powershell/module/microsoft.powershell.core/about/about_parsing#passing-arguments-to-native
+[2]: /powershell/module/microsoft.powershell.core/about/about_quoting_rules
+[3]: ../experimental-features.md#psnativecommandargumentpassing
+[4]: /powershell/module/microsoft.powershell.core/about/about_redirection
+[5]: /powershell/module/microsoft.powershell.core/about/about_output_streams
+[6]: ../experimental-features.md#psnativecommanderroractionpreference
+[7]: /powershell/module/microsoft.powershell.core/about/about_operators#call-operator-
+[8]: /powershell/module/microsoft.powershell.management/start-process
+[9]: /powershell/module/microsoft.powershell.management/invoke-item
